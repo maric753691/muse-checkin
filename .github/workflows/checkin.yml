@@ -1,0 +1,43 @@
+name: muse-checkin
+
+on:
+  # 02:00 UTC = 北京时间 10:00，之后脚本内再随机延迟 1~36 分钟
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      skip_delay:
+        description: "跳过随机延迟（仅测试用）"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Random delay
+        if: ${{ !inputs.skip_delay }}
+        run: |
+          s=$(( RANDOM % 2100 + 60 ))
+          echo "random delay: ${s}s (~$((s / 60)) min)"
+          sleep "$s"
+
+      - name: Check in
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_SESSION: ${{ secrets.TG_SESSION }}
+        run: python checkin.py
