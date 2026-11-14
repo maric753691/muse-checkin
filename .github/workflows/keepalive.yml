@@ -1,0 +1,24 @@
+name: keepalive
+
+# 每月一次空提交，防止仓库长期无活动导致 GitHub 停用 schedule
+on:
+  schedule:
+    - cron: "0 3 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Touch commit
+        run: |
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > .last-keepalive
+          git config user.name "keepalive-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add .last-keepalive
+          git commit -m "keepalive $(date -u +%F)" || echo "nothing to commit"
+          git push
