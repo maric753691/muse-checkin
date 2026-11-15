@@ -2,10 +2,11 @@ name: muse-checkin
 
 on:
   schedule:
-    # 02:00 UTC = 北京时间 10:00，主签到（之后随机延迟 1~36 分钟）
-    - cron: "0 2 * * *"
-    # 04:30 UTC = 北京时间 12:30，补签兜底；若已签到 bot 会回“今天已经签到”，幂等
-    - cron: "30 4 * * *"
+    # 避开整点（整点 cron 在 GitHub 高峰期最容易被延迟/丢弃）
+    # 02:17 UTC = 北京时间 10:17，主签到（之后随机延迟 1~30 分钟）
+    - cron: "17 2 * * *"
+    # 05:23 UTC = 北京时间 13:23，补签兜底；已签到 bot 会回“今天已经签到”，幂等
+    - cron: "23 5 * * *"
   workflow_dispatch:
     inputs:
       skip_delay:
@@ -31,9 +32,9 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Random delay
-        if: ${{ (github.event_name == 'workflow_dispatch' && !inputs.skip_delay) || github.event.schedule == '0 2 * * *' }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && !inputs.skip_delay) || github.event.schedule == '17 2 * * *' }}
         run: |
-          s=$(( RANDOM % 2100 + 60 ))
+          s=$(( RANDOM % 1800 + 60 ))
           echo "random delay: ${s}s (~$((s / 60)) min)"
           sleep "$s"
 
