@@ -1,6 +1,7 @@
 name: cron-probe
 
 # 临时探针：每 5 分钟触发一次，用来确认 GitHub 的 schedule 触发器对本仓库是否生效。
+# reg-bump: 2026-11-15T03:45Z (仓库转 public 后强制重新注册)
 on:
   schedule:
     - cron: "*/5 * * * *"
