@@ -5,9 +5,17 @@
 
 ## 原理
 
-workflow 每天 02:00 UTC（北京时间 10:00）触发，随机延迟 1~36 分钟后执行
-`checkin.py`：用预先登录好的 StringSession 以本人账号身份发送 `/checkin`，
-解析 bot 回复并写入日志。
+`checkin.py`：用预先登录好的 StringSession 以本人账号身份发送 `/checkin`，解析 bot 回复写日志。
+
+触发方式（三路冗余，重复签到时 bot 会回"今天已经签到过了"，幂等无副作用）：
+
+1. **Google Apps Script 云端闹钟**（主）：每天 10:17 调 `workflow_dispatch` 触发本 workflow，
+   触发主签到；13:23 再触发一次补签。代码见 `apps_script.js`。
+2. **GitHub 原生 cron**（备用）：`17 2 * * *` / `23 5 * * *` UTC。注意：**GitHub 免费账号的
+   schedule 触发器实测可能完全不触发**（本仓库私有状态下 11 小时 0 次、改为 public 后 40 分钟
+   `*/5` 探针也 0 次，而 `workflow_dispatch` 正常），所以不能只依赖它。
+3. **本机 Windows 计划任务 / 登录启动**（兜底）：`run_local.ps1` 直接在本机跑签到，
+   仅在电脑开机时有效。
 
 ## 需要的 Secrets
 
