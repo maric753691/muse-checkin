@@ -1,0 +1,15 @@
+name: cron-probe
+
+# 临时探针：每 5 分钟触发一次，用来确认 GitHub 的 schedule 触发器对本仓库是否生效。
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "cron probe fired at $(date -u +%FT%TZ)"
