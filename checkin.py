@@ -82,6 +82,14 @@ async def main():
         print("---- bot reply ----")
         print(text)
         print("-------------------")
+        if code == 0 and label == "SUCCESS" and os.environ.get("NOTIFY_ON_SUCCESS", "1") == "1":
+            try:
+                await client.send_message(
+                    "me", f"✅ MusePromote 自动签到成功\n{text}"
+                )
+                print("success notification sent to Saved Messages")
+            except Exception as exc:  # 通知失败不应影响签到结果
+                print(f"WARN: notify failed: {exc}")
         return code
     finally:
         await client.disconnect()
